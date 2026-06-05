@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя Галерея</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0b0b0b; /* Глубокий черный цвет для полей */
+            font-family: Arial, sans-serif;
+        }
+
+        /* Контейнер для полноэкранного слайдера */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            /* CONTAIN заставляет фото полностью помещаться в экран без обрезки */
+            object-fit: contain; 
+            display: none;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        /* Оптимизированные кнопки навигации */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            border-radius: 50%; /* Круглые кнопки аккуратнее */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s, transform 0.1s;
+            user-select: none;
+            z-index: 10;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .nav-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .prev { left: 20px; }
+        .next { right: 20px; }
+
+        /* Оптимизация под мобильные устройства (скрываем стрелки, оставляем только свайпы) */
+        @media (max-width: 768px) {
+            .nav-btn {
+                display: none; /* На телефонах кнопки не нужны, там листают пальцем */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slider-container">
+        <img src="photo1.jpg" width="1086" height="1448" class="slide active" alt="Фото 1">
+        
+        <img src="photo2.jpg" width="1086" height="1448" class="slide" loading="lazy" alt="Фото 2">
+        <img src="photo3.jpg" width="1086" height="1448" class="slide" loading="lazy" alt="Фото 3">
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+
+        function showSlide(index) {
+            if (slides.length === 0) return;
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (index + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        // Управление клавиатурой (влево/вправо)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        // Оптимизированный адаптивный свайп для тач-скринов
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleGesture();
+        }, { passive: true });
+
+        function handleGesture() {
+            const swipeDistance = touchStartX - touchEndX;
+            // Порог свайпа в 50 пикселей, чтобы избежать случайных срабатываний при скролле
+            if (swipeDistance > 50) {
+                changeSlide(1);  // Свайп влево -> следующее фото
+            } else if (swipeDistance < -50) {
+                changeSlide(-1); // Свайп вправо -> предыдущее фото
+            }
+        }
+    </script>
+</body>
+</html>
